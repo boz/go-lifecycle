@@ -1,4 +1,4 @@
-# go-lifecycle
+# go-lifecycle [![Build Status](https://travis-ci.org/boz/go-lifecycle.svg?branch=master)](https://travis-ci.org/boz/go-lifecycle)
 
 Lifecycle utility for goroutine-based objects.
 
