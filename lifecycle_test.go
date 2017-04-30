@@ -18,7 +18,7 @@ func TestLifecycle_ctx_cancel(t *testing.T) {
 	defer cancel()
 
 	cache := example.NewCache(ctx)
-	runTestWithShutdown(t, cache, cancel, "cache.Shutdown()")
+	runTestWithShutdown(t, cache, cancel, "context.Cancel()")
 }
 
 func runTestWithShutdown(t *testing.T, cache example.Cache, stopfn func(), msg string) {
