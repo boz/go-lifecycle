@@ -4,15 +4,35 @@ import "context"
 
 type Lifecycle interface {
 	LifecycleReader
+
+	// ShutdownRequest() returns a channel that is available for reading when
+	// a shutdown has requested.
 	ShutdownRequest() <-chan struct{}
+
+	// ShutdownInitiated() declares that shutdown has begun.  Will panic if called twice.
 	ShutdownInitiated()
+
+	// ShutdownCompleted() declares that shutdown has completed.  Will panic if called twice.
 	ShutdownCompleted()
+
+	// WatchContext() observes the given context and initiates a shutdown
+	// if the context is shutdown before the lifecycle is.
 	WatchContext(context.Context)
+
+	// Shutdown() initiates shutdown by sending a value to the channel
+	// requtned by ShutdownRequest() and blocks untill ShutdownCompleted()
+	// is called.
 	Shutdown()
 }
 
+// LifecycleReader exposes read-only access to lifecycle state.
 type LifecycleReader interface {
+	// ShuttingDown() returns a channel that is available for reading
+	// after ShutdownInitiated() has been called.
 	ShuttingDown() <-chan struct{}
+
+	// Done() returns a channel that is available for reading
+	// after ShutdownCompleted() has been called.
 	Done() <-chan struct{}
 }
 
@@ -30,37 +50,26 @@ func New() Lifecycle {
 	}
 }
 
-// ShutdownRequest() returns a channel that is available for reading when
-// a shutdown has requested.
 func (l *lifecycle) ShutdownRequest() <-chan struct{} {
 	return l.stopch
 }
 
-// ShutdownInitiated() declares that shutdown has begun.  Will panic if called twice.
 func (l *lifecycle) ShutdownInitiated() {
 	close(l.stoppingch)
 }
 
-// ShuttingDown() returns a channel that is available for reading
-// after ShutdownInitiated() has been called.
 func (l *lifecycle) ShuttingDown() <-chan struct{} {
 	return l.stoppingch
 }
 
-// ShutdownCompleted() declares that shutdown has completed.  Will panic if called twice.
 func (l *lifecycle) ShutdownCompleted() {
 	close(l.stoppedch)
 }
 
-// Done() returns a channel that is available for reading
-// after ShutdownCompleted() has been called.
 func (l *lifecycle) Done() <-chan struct{} {
 	return l.stoppedch
 }
 
-// Shutdown() initiates shutdown by sending a value to the channel
-// requtned by ShutdownRequest() and blocks untill ShutdownCompleted()
-// is called.
 func (l *lifecycle) Shutdown() {
 	for {
 		select {
@@ -72,8 +81,6 @@ func (l *lifecycle) Shutdown() {
 	}
 }
 
-// WatchContext() observes the given context and initiates a shutdown
-// if the context is shutdown before the lifecycle is.
 func (l *lifecycle) WatchContext(ctx context.Context) {
 	var stopch chan struct{}
 	donech := ctx.Done()
