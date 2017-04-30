@@ -71,14 +71,13 @@ func (l *lifecycle) Done() <-chan struct{} {
 }
 
 func (l *lifecycle) Shutdown() {
-	for {
-		select {
-		case l.stopch <- struct{}{}:
-		case <-l.stoppingch:
-			<-l.stoppedch
-			return
-		}
+	select {
+	case <-l.stoppedch:
+		return
+	case l.stopch <- struct{}{}:
+	case <-l.stoppingch:
 	}
+	<-l.stoppedch
 }
 
 func (l *lifecycle) WatchContext(ctx context.Context) {
