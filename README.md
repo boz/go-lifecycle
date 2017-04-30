@@ -27,8 +27,9 @@ func NewCache(ctx context.Context) Cache {
 
 func (c *cache) run() {
 	defer c.lc.ShutdownCompleted()
-	var drainedch chan bool
+
 	stopch := c.lc.ShutdownRequest()
+	drainedch := make(chan bool, 1)
 
 	for {
 		select {
@@ -36,10 +37,8 @@ func (c *cache) run() {
 			stopch = nil
 			c.lc.ShutdownInitiated()
 
-			// simulate any necessary draining
-			drainedch = make(chan bool, 1)
+			// done when dependent processes compete in real world
 			drainedch <- true
-
 		case <-drainedch:
 			return
     // ...
