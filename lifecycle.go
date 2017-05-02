@@ -19,6 +19,9 @@ type Lifecycle interface {
 	// if the context is shutdown before the lifecycle is.
 	WatchContext(context.Context)
 
+	// Begins shutdown when given channel is ready for reading.
+	WatchChannel(<-chan struct{})
+
 	// Shutdown() initiates shutdown by sending a value to the channel
 	// requtned by ShutdownRequest() and blocks untill ShutdownCompleted()
 	// is called.
@@ -81,8 +84,11 @@ func (l *lifecycle) Shutdown() {
 }
 
 func (l *lifecycle) WatchContext(ctx context.Context) {
+	l.WatchChannel(ctx.Done())
+}
+
+func (l *lifecycle) WatchChannel(donech <-chan struct{}) {
 	var stopch chan struct{}
-	donech := ctx.Done()
 	for {
 		select {
 		case <-l.stoppingch:
