@@ -21,6 +21,11 @@ func TestLifecycle_ctx_cancel(t *testing.T) {
 	runTestWithShutdown(t, cache, cancel, "context.Cancel()")
 }
 
+func TestLifecycle_shutdownAsync(t *testing.T) {
+	cache := example.NewCache(context.Background())
+	runTestWithShutdown(t, cache, cache.ShutdownAsync, "cache.ShutdownAsync()")
+}
+
 func runTestWithShutdown(t *testing.T, cache example.Cache, stopfn func(), msg string) {
 	if err := cache.Put("foo", "bar"); err != nil {
 		t.Errorf("%v: unable to put before shutdown: %v", msg, err)

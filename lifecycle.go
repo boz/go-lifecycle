@@ -26,6 +26,9 @@ type Lifecycle interface {
 	// requtned by ShutdownRequest() and blocks untill ShutdownCompleted()
 	// is called.
 	Shutdown()
+
+	// Initiate shutdown but does not block until complete.
+	ShutdownAsync()
 }
 
 // LifecycleReader exposes read-only access to lifecycle state.
@@ -81,6 +84,14 @@ func (l *lifecycle) Shutdown() {
 	case <-l.stoppingch:
 	}
 	<-l.stoppedch
+}
+
+func (l *lifecycle) ShutdownAsync() {
+	select {
+	case <-l.stoppedch:
+	case <-l.stoppingch:
+	case l.stopch <- struct{}{}:
+	}
 }
 
 func (l *lifecycle) WatchContext(ctx context.Context) {

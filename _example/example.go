@@ -15,6 +15,7 @@ type Cache interface {
 	Put(string, string) error
 	Get(string) (string, error)
 	Shutdown()
+	ShutdownAsync()
 	Done() <-chan struct{}
 }
 
@@ -95,6 +96,10 @@ func (c *cache) Get(key string) (string, error) {
 
 func (c *cache) Shutdown() {
 	c.lc.Shutdown()
+}
+
+func (c *cache) ShutdownAsync() {
+	c.lc.ShutdownAsync()
 }
 
 func (c *cache) Done() <-chan struct{} {
