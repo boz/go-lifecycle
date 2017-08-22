@@ -10,7 +10,7 @@ import (
 
 func TestLifecycle_shutdown(t *testing.T) {
 	cache := example.NewCache(context.Background())
-	runTestWithShutdown(t, cache, cache.Shutdown, "cache.Shutdown()")
+	runTestWithShutdown(t, cache, func() { cache.Shutdown(nil) }, "cache.Shutdown()")
 }
 
 func TestLifecycle_ctx_cancel(t *testing.T) {
@@ -23,7 +23,7 @@ func TestLifecycle_ctx_cancel(t *testing.T) {
 
 func TestLifecycle_shutdownAsync(t *testing.T) {
 	cache := example.NewCache(context.Background())
-	runTestWithShutdown(t, cache, cache.ShutdownAsync, "cache.ShutdownAsync()")
+	runTestWithShutdown(t, cache, func() { cache.ShutdownAsync(nil) }, "cache.ShutdownAsync()")
 }
 
 func runTestWithShutdown(t *testing.T, cache example.Cache, stopfn func(), msg string) {

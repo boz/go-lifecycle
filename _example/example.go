@@ -14,9 +14,10 @@ var (
 type Cache interface {
 	Put(string, string) error
 	Get(string) (string, error)
-	Shutdown()
-	ShutdownAsync()
+	Shutdown(error)
+	ShutdownAsync(error)
 	Done() <-chan struct{}
+	Error() error
 }
 
 type cache struct {
@@ -58,8 +59,8 @@ func (c *cache) run() {
 
 	for {
 		select {
-		case <-stopch:
-			c.lc.ShutdownInitiated()
+		case err := <-stopch:
+			c.lc.ShutdownInitiated(err)
 			stopch = nil
 
 			// done when dependent processes compete in real world
@@ -94,14 +95,18 @@ func (c *cache) Get(key string) (string, error) {
 	}
 }
 
-func (c *cache) Shutdown() {
-	c.lc.Shutdown()
+func (c *cache) Shutdown(err error) {
+	c.lc.Shutdown(err)
 }
 
-func (c *cache) ShutdownAsync() {
-	c.lc.ShutdownAsync()
+func (c *cache) ShutdownAsync(err error) {
+	c.lc.ShutdownAsync(err)
 }
 
 func (c *cache) Done() <-chan struct{} {
 	return c.lc.Done()
+}
+
+func (c *cache) Error() error {
+	return c.lc.Error()
 }
