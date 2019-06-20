@@ -37,7 +37,7 @@ func runTestWithShutdown(t *testing.T, cache example.Cache, stopfn func(), msg s
 
 	select {
 	case <-cache.Done():
-		t.Error("%v: done readable before shutdown", msg)
+		t.Errorf("%v: done readable before shutdown", msg)
 	default:
 	}
 
@@ -46,7 +46,7 @@ func runTestWithShutdown(t *testing.T, cache example.Cache, stopfn func(), msg s
 	select {
 	case <-cache.Done():
 	case <-time.After(time.Millisecond * 10):
-		t.Errorf("%v: shutdown not completed after 10ms")
+		t.Error("shutdown not completed after 10ms")
 	}
 
 	if err := cache.Put("foo", "bar"); err != example.ErrNotRunning {

@@ -54,25 +54,20 @@ func NewCache(ctx context.Context) Cache {
 func (c *cache) run() {
 	defer c.lc.ShutdownCompleted()
 
-	stopch := c.lc.ShutdownRequest()
-	drainedch := make(chan bool, 1)
-
+loop:
 	for {
 		select {
-		case err := <-stopch:
+		case err := <-c.lc.ShutdownRequest():
 			c.lc.ShutdownInitiated(err)
-			stopch = nil
-
-			// done when dependent processes compete in real world
-			drainedch <- true
-		case <-drainedch:
-			return
+			break loop
 		case req := <-c.putch:
 			c.items[req.key] = req.value
 		case req := <-c.getch:
 			req.valch <- c.items[req.key]
 		}
 	}
+
+	// shutdown, wait for child resources
 }
 
 func (c *cache) Put(key, value string) error {
